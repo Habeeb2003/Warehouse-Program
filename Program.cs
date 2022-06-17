@@ -31,15 +31,21 @@ namespace Program
                 string[] headers = lines[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
 				// LINQ to querry the file
-                IEnumerable<int> q = from line in lines.Skip(1) // skiped headers
+                IEnumerable<int[]> q = from line in lines.Skip(1) // skiped headers
                         where line.Contains(state!)	//	filter lines by checking if line contains the state
                         // split line into an array and get the index of state in it
-                        select line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList().IndexOf(state!);	
+                        select line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList().Select((element ,index) => (element == state) ? index : -1).Where(index => index != -1).ToArray();	
 
-                foreach (int index in q)
+                foreach (int[] indexes in q)
                 {
                 	// add number of stocks to totalNo fields
-                    totalNo += getNoOfStocks(headers[index], sku!);
+                    foreach (var index in indexes)
+                    {
+                        // Console.WriteLine(index);
+                        totalNo += getNoOfStocks(headers[index], sku!);
+                    }
+                    // Console.WriteLine("Hi");
+                    
                 }
 
                 Console.WriteLine("Total no of stocks = {0}", totalNo);
@@ -61,9 +67,10 @@ namespace Program
                         where line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[0] == skuNo
                         // select the value under the warehouse column
                         select line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList().ElementAt(headers.ToList().IndexOf(warehouseName));
-        	
+
                 foreach (string stockNo in q)
                 {
+                    Console.WriteLine(stockNo);
                 	// return stock no to main
                     return Convert.ToInt32(stockNo);
                 }
